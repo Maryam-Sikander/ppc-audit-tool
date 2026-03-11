@@ -24,7 +24,6 @@ except FileNotFoundError:
 
 @st.cache_data(show_spinner=False)
 def read_file(uploaded):
-    """Read an uploaded CSV or Excel file into a DataFrame."""
     if uploaded is None:
         return None
     try:
@@ -101,7 +100,7 @@ if run_audit:
                 unsafe_allow_html=True,
             )
 
-    # Executive Summary — KPI Tiles
+    # KPI
     summary = kpi_summary(combined)
     units_val = int(combined["Units"].sum()) if "Units" in combined.columns else 0
     waste = summary["Waste Spend"]
@@ -109,7 +108,6 @@ if run_audit:
 
     st.markdown("### Executive Summary")
 
-    # Row 1 — Volume metrics
     cols = st.columns(5)
     row1 = [
         ("Total Spend",  f"${summary['Spend']:,.2f}",      "#dc2626"),
@@ -123,7 +121,7 @@ if run_audit:
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # Row 2 — Efficiency metrics
+    # Efficiency metrics
     cols2 = st.columns(5)
     row2 = [
         ("ACOS",  f"{summary['ACOS']:.2%}",   "#dc2626" if summary["ACOS"] > 0.3 else "#059669"),

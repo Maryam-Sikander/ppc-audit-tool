@@ -28,12 +28,8 @@ def clean_money_pct_numeric(s: pd.Series) -> pd.Series:
          .astype(float)
     )
 
-def try_parse_date_col(df):
-    """
-    Try to find a sensible date Series in the raw dataframe.
-    Looks for many variants including 'Start Date' / 'End Date' used in SP search-term exports.
-    Returns a pd.Series datetime (or None).
-    """
+def parse_date_col(df):
+
     candidates = [
         "Date", "date", "day", "report date", "transaction date", "report_date",
         "Start Date", "End Date", "start date", "end date", "start_date", "end_date"
@@ -49,16 +45,11 @@ def try_parse_date_col(df):
     return None
 
 def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
-    """
-    Map various Amazon column variants (SP, SB, SD) -> canonical schema:
-    ['Ad Type','Date','Campaign','Match Type','Placement','Clicks','Impressions','Spend','Sales','Orders']
-    """
     if df is None or df.empty:
         return pd.DataFrame(columns=["Ad Type","Date","Campaign","Match Type","Placement","Clicks","Impressions","Spend","Sales","Orders"])
 
     df = strip_cols(df)
 
-    # Try to detect Sponsored Display–specific fields
     clicks_col = first_present(df, [
         "Clicks", "clicks"
     ])
@@ -85,7 +76,7 @@ def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
     match_col = first_present(df, ["Match Type", "match type", "MatchType"])
     plac_col = first_present(df, ["Placement", "placement"])
     camp_col = first_present(df, ["Campaign", "Campaign Name", "campaign"])
-    date_series = try_parse_date_col(df)
+    date_series = parse_date_col(df)
 
     required_missing = [n for n, v in {
         "Clicks": clicks_col, "Impressions": impr_col, "Spend": spend_col,
@@ -109,7 +100,6 @@ def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
     out["Orders"] = clean_money_pct_numeric(df[orders_col]).fillna(0)
     out["Units"]  = clean_money_pct_numeric(df[units_col]).fillna(0)
 
-    # Derived or fallback logic (e.g. waste spend in SD already present)
     if "Wasted Spend" in df.columns:
         ws = clean_money_pct_numeric(df["Wasted Spend"])
         if "Spend" in out.columns:
@@ -120,7 +110,6 @@ def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
     else:
         out["Waste Spend"] = np.where(out["Orders"] == 0, out["Spend"], 0.0)
 
-    # Ensure numeric dtypes
     for c in ["Clicks", "Impressions", "Spend", "Sales", "Orders", "Units", "Waste Spend"]:
         if c not in out.columns:
             out[c] = 0.0
@@ -128,10 +117,7 @@ def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
 
 
 def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Add CTR, CVR, CPC, ACOS, ROAS, CAC and Waste Spend.
-    Waste Spend = Spend where Orders == 0 for the row (i.e. spent but no orders)
-    """
+    
     df = df.copy()
     df["CPC"]  = np.where(df["Clicks"] > 0, df["Spend"] / df["Clicks"], 0.0)
     df["CTR"]  = np.where(df["Impressions"] > 0, df["Clicks"] / df["Impressions"], 0.0)
@@ -143,9 +129,7 @@ def add_metrics(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def kpi_summary(df: pd.DataFrame) -> dict:
-    """
-    Aggregate numeric KPIs for the given dataframe and return raw numbers (no UI formatting).
-    """
+  
     tot_clicks = df["Clicks"].sum()
     tot_impr   = df["Impressions"].sum()
     tot_spend  = df["Spend"].sum()
@@ -153,7 +137,7 @@ def kpi_summary(df: pd.DataFrame) -> dict:
     tot_orders = df["Orders"].sum()
     tot_waste  = df["Waste Spend"].sum()
 
-    # safe calculations
+    # calculations
     cpc = (tot_spend / tot_clicks) if tot_clicks > 0 else 0.0
     ctr = (tot_clicks / tot_impr) if tot_impr > 0 else 0.0
     cvr = (tot_orders / tot_clicks) if tot_clicks > 0 else 0.0
@@ -179,7 +163,6 @@ def kpi_summary(df: pd.DataFrame) -> dict:
 def pivot(df: pd.DataFrame, by: str, values=None, add_grand_total: bool = False) -> pd.DataFrame:
     if values is None:
         values = ["Impressions","Clicks","Spend","Sales","Units","Orders","Waste Spend","CPC","CTR","CVR","ACOS","ROAS","CAC"]
-    # Ensure all value columns exist in df, fill missing with 0
     for v in values:
         if v not in df.columns:
             df = df.copy()
@@ -188,19 +171,18 @@ def pivot(df: pd.DataFrame, by: str, values=None, add_grand_total: bool = False)
         return pd.DataFrame(columns=[by]+values)
     sum_cols = [c for c in values if c in ["Impressions","Clicks","Spend","Sales","Units","Orders","Waste Spend"]]
     g = df.groupby(by, dropna=False)[sum_cols].sum().reset_index()
-    # Recalculate ratio metrics from aggregated sums
+    # ratio metrics from aggregated sums
     g["CPC"]  = np.where(g["Clicks"]>0, g["Spend"]/g["Clicks"], 0.0)
     g["CTR"]  = np.where(g["Impressions"]>0, g["Clicks"]/g["Impressions"], 0.0)
     g["CVR"]  = np.where(g["Clicks"]>0, g["Orders"]/g["Clicks"], 0.0)
     g["ACOS"] = np.where(g["Sales"]>0, g["Spend"]/g["Sales"], 0.0)
     g["ROAS"] = np.where(g["Spend"]>0, g["Sales"]/g["Spend"], 0.0)
     g["CAC"]  = np.where(g["Orders"]>0, g["Spend"]/g["Orders"], 0.0)
-    # Percentage share columns
+    # Percentage share cols
     total_spend = g["Spend"].sum()
     total_sales = g["Sales"].sum()
     g["% Adspend"] = np.where(total_spend > 0, g["Spend"] / total_spend, 0.0)
     g["% Ad Sale"] = np.where(total_sales > 0, g["Sales"] / total_sales, 0.0)
-    # Add Grand Total row
     if add_grand_total and not g.empty:
         totals = {by: "Grand Total"}
         for c in sum_cols:
@@ -218,10 +200,7 @@ def pivot(df: pd.DataFrame, by: str, values=None, add_grand_total: bool = False)
     return g
 
 def export_excel(dfs: dict) -> bytes:
-    """
-    Utility to create an excel workbook from a dict of name->DataFrame.
-    Kept here because it's data/output related (no UI).
-    """
+  
     wb = Workbook()
     ws = wb.active
     ws.title = "README"

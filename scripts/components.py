@@ -1,5 +1,3 @@
-"""UI components for the PPC Audit Dashboard."""
-
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
@@ -80,7 +78,6 @@ def render_pivot(df: pd.DataFrame, group_col: str, title: str) -> pd.DataFrame:
 
 
 def render_spend_sales_line(df: pd.DataFrame, date_col: str = "Date", title: str = "Spend vs Sales Over Time"):
-    """Line chart of daily Spend & Sales."""
     if date_col not in df.columns or not pd.api.types.is_datetime64_any_dtype(df[date_col]):
         return
     daily = df.groupby(date_col)[["Spend", "Sales"]].sum().reset_index().sort_values(date_col)
@@ -110,7 +107,6 @@ def render_spend_sales_line(df: pd.DataFrame, date_col: str = "Date", title: str
 
 
 def render_charts(piv: pd.DataFrame, group_col: str, label: str):
-    """Suite of analytical charts for a pivot table."""
     col_a, col_b = st.columns(2)
     with col_a:
         st.plotly_chart(viz.plot_spend_vs_sales(piv, group_col, f"{label} — Spend vs Sales"), use_container_width=True)

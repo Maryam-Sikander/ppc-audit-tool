@@ -1,8 +1,3 @@
-"""
-Visualization module for Amazon PPC Audit Tool
-Contains all Plotly chart generation functions
-"""
-
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
@@ -17,19 +12,7 @@ def plot_comparison_bars(df: pd.DataFrame,
                          y_cols: list, 
                          title: str,
                          colors: list = None) -> go.Figure:
-    """
-    Create grouped bar chart for metric comparisons
-    
-    Args:
-        df: Dataframe with data
-        x_col: Column for x-axis
-        y_cols: List of columns for y-axis (metrics to compare)
-        title: Chart title
-        colors: Optional list of colors
-        
-    Returns:
-        Plotly Figure
-    """
+
     if df is None or df.empty:
         return go.Figure()
     
@@ -68,17 +51,7 @@ def plot_comparison_bars(df: pd.DataFrame,
 
 
 def plot_donut_chart(labels: list, values: list, title: str) -> go.Figure:
-    """
-    Create donut chart for distribution visualization
-    
-    Args:
-        labels: Category labels
-        values: Values for each category
-        title: Chart title
-        
-    Returns:
-        Plotly Figure
-    """
+
     fig = go.Figure(data=[go.Pie(
         labels=labels,
         values=values,
@@ -102,17 +75,7 @@ def plot_donut_chart(labels: list, values: list, title: str) -> go.Figure:
 
 
 def plot_funnel(impressions: float, clicks: float, orders: float) -> go.Figure:
-    """
-    Create conversion funnel visualization
-    
-    Args:
-        impressions: Total impressions
-        clicks: Total clicks
-        orders: Total orders
-        
-    Returns:
-        Plotly Figure
-    """
+
     fig = go.Figure(go.Funnel(
         y = ["Impressions", "Clicks", "Orders"],
         x = [impressions, clicks, orders],
@@ -138,20 +101,8 @@ def plot_gauge(value: float,
                max_val: float = 1.0,
                threshold_good: float = 0.7,
                threshold_bad: float = 0.3) -> go.Figure:
-    """
-    Create gauge chart for single metric
+   
     
-    Args:
-        value: Metric value
-        title: Chart title
-        max_val: Maximum value for scale
-        threshold_good: Good performance threshold
-        threshold_bad: Bad performance threshold
-        
-    Returns:
-        Plotly Figure
-    """
-    # Determine color based on value
     normalized_value = value / max_val if max_val > 0 else 0
     
     if normalized_value >= threshold_good:
@@ -195,15 +146,7 @@ def plot_gauge(value: float,
 
 
 def plot_scatter_efficiency(df: pd.DataFrame) -> go.Figure:
-    """
-    Create ACOS vs ROAS efficiency scatter plot
-    
-    Args:
-        df: Dataframe with ACOS, ROAS, and Spend columns
-        
-    Returns:
-        Plotly Figure
-    """
+
     if df is None or df.empty:
         return go.Figure()
     
@@ -238,16 +181,7 @@ def plot_scatter_efficiency(df: pd.DataFrame) -> go.Figure:
 
 
 def plot_quarterly_trends(df: pd.DataFrame, metrics: list) -> go.Figure:
-    """
-    Create line chart showing trends across quarters
-    
-    Args:
-        df: Dataframe with Quarter column and metrics
-        metrics: List of metrics to plot
-        
-    Returns:
-        Plotly Figure
-    """
+   
     if df is None or df.empty or 'Quarter' not in df.columns:
         return go.Figure()
     
@@ -284,15 +218,7 @@ def plot_quarterly_trends(df: pd.DataFrame, metrics: list) -> go.Figure:
 
 
 def plot_ad_type_comparison(df: pd.DataFrame) -> go.Figure:
-    """
-    Create 2x2 subplot comparing SP vs SB performance
-    
-    Args:
-        df: Dataframe with Ad Type breakdown
-        
-    Returns:
-        Plotly Figure
-    """
+ 
     if df is None or df.empty:
         return go.Figure()
     
@@ -361,16 +287,7 @@ def plot_ad_type_comparison(df: pd.DataFrame) -> go.Figure:
 
 
 def plot_match_type_analysis(df: pd.DataFrame, ad_type: str) -> go.Figure:
-    """
-    Create 2x2 subplot for match type analysis
-    
-    Args:
-        df: Dataframe with Match Type data
-        ad_type: 'SP' or 'SB'
-        
-    Returns:
-        Plotly Figure
-    """
+   
     if df is None or df.empty:
         return go.Figure()
     
@@ -444,15 +361,7 @@ def plot_match_type_analysis(df: pd.DataFrame, ad_type: str) -> go.Figure:
 
 
 def plot_brand_share_evolution(df: pd.DataFrame) -> go.Figure:
-    """
-    Plot brand share evolution across quarters
-    
-    Args:
-        df: SQP trends dataframe with quarters
-        
-    Returns:
-        Plotly Figure
-    """
+
     if df is None or df.empty or 'Quarter' not in df.columns:
         return go.Figure()
     
@@ -506,16 +415,7 @@ def plot_brand_share_evolution(df: pd.DataFrame) -> go.Figure:
 
 
 def plot_wasted_spend(wasted: float, efficient: float) -> go.Figure:
-    """
-    Create donut chart for wasted vs efficient spend
-    
-    Args:
-        wasted: Wasted spend amount
-        efficient: Efficient spend amount
-        
-    Returns:
-        Plotly Figure
-    """
+
     labels = ['Efficient Spend', 'Wasted Spend']
     values = [efficient, wasted]
     colors = [Theme.COLORS['success'], Theme.COLORS['danger']]
@@ -542,16 +442,7 @@ def plot_wasted_spend(wasted: float, efficient: float) -> go.Figure:
 
 
 def plot_heatmap(df: pd.DataFrame, title: str) -> go.Figure:
-    """
-    Create heatmap visualization
-    
-    Args:
-        df: Dataframe with numeric data
-        title: Chart title
-        
-    Returns:
-        Plotly Figure
-    """
+
     if df is None or df.empty:
         return go.Figure()
     
@@ -578,9 +469,7 @@ def plot_heatmap(df: pd.DataFrame, title: str) -> go.Figure:
 
 
 def plot_spend_vs_sales(df: pd.DataFrame, group_col: str, title: str) -> go.Figure:
-    """
-    Grouped bar chart comparing Spend vs Sales by a grouping column.
-    """
+ 
     if df is None or df.empty:
         return go.Figure()
 
@@ -619,13 +508,11 @@ def plot_spend_vs_sales(df: pd.DataFrame, group_col: str, title: str) -> go.Figu
 
 
 def plot_spend_distribution(df: pd.DataFrame, group_col: str, metric: str, title: str) -> go.Figure:
-    """
-    Donut chart showing distribution of a metric (Spend/Sales) across groups.
-    """
+  
     if df is None or df.empty or metric not in df.columns:
         return go.Figure()
 
-    # Filter out Grand Total row if present
+    # Filter out Grand Total 
     chart_df = df[df[group_col] != "Grand Total"].copy()
 
     fig = go.Figure(data=[go.Pie(
@@ -651,9 +538,7 @@ def plot_spend_distribution(df: pd.DataFrame, group_col: str, metric: str, title
 
 
 def plot_acos_comparison(df: pd.DataFrame, group_col: str, title: str) -> go.Figure:
-    """
-    Horizontal bar chart comparing ACOS across groups with a target line at 30%.
-    """
+
     if df is None or df.empty:
         return go.Figure()
 
@@ -687,9 +572,7 @@ def plot_acos_comparison(df: pd.DataFrame, group_col: str, title: str) -> go.Fig
 
 
 def plot_efficiency_metrics(df: pd.DataFrame, group_col: str, title: str) -> go.Figure:
-    """
-    Multi-metric subplot showing CPC, CTR, CVR side by side.
-    """
+ 
     if df is None or df.empty:
         return go.Figure()
 
@@ -742,9 +625,7 @@ def plot_efficiency_metrics(df: pd.DataFrame, group_col: str, title: str) -> go.
 
 
 def plot_wasted_spend_bar(df: pd.DataFrame, group_col: str, title: str) -> go.Figure:
-    """
-    Stacked bar chart showing efficient vs wasted spend per group.
-    """
+
     if df is None or df.empty:
         return go.Figure()
 

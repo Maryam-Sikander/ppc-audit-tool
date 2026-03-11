@@ -4,8 +4,6 @@ from typing import Union, List, Dict, Any
 from typing import Tuple
 
 
-
-
 def format_currency(value: Union[float, int], currency_symbol: str = "$") -> str:
     if pd.isna(value) or value is None:
         return f"{currency_symbol}0.00"
@@ -71,35 +69,31 @@ def format_dataframe_for_display(df: pd.DataFrame) -> pd.DataFrame:
     display_df = df.copy()
     
     for col in display_df.columns:
-        # Skip non-numeric columns
         if not pd.api.types.is_numeric_dtype(display_df[col]):
             continue
         
         col_lower = col.lower()
         
-        # Currency columns
+        # Currency col
         if any(keyword in col_lower for keyword in ['spend', 'sales', 'revenue', 'cost', 'cpc', 'cpm']):
             display_df[col] = display_df[col].apply(lambda x: format_currency(x))
         
-        # Percentage columns
+        # Percentage
         elif any(keyword in col_lower for keyword in ['acos', 'roas', 'ctr', 'cvr', 'rate', '%', 'share']):
-            # Check if values are already in percentage format (>1) or decimal format (<1)
             if display_df[col].max() <= 1:
                 display_df[col] = display_df[col].apply(lambda x: format_percentage(x))
             else:
                 display_df[col] = display_df[col].apply(lambda x: format_percentage(x/100))
         
-        # Count columns
+        # Count cols
         elif any(keyword in col_lower for keyword in ['clicks', 'impressions', 'orders', 'sessions', 'units', 'count']):
             display_df[col] = display_df[col].apply(lambda x: format_number(x))
         
-        # Default decimal formatting
+        # decimal formatting
         else:
             display_df[col] = display_df[col].apply(lambda x: format_decimal(x))
     
     return display_df
-
-
 
 
 def safe_divide(numerator: Union[float, int], denominator: Union[float, int], 
@@ -134,44 +128,20 @@ def calculate_ctr(clicks: float, impressions: float) -> float:
 
 
 def calculate_cvr(orders: float, clicks: float) -> float:
-    # Calculate CVR (Conversion Rate)"""
+    # Calculate CVR
     return safe_divide(orders, clicks, 0.0)
 
 
 def calculate_cpc(spend: float, clicks: float) -> float:
-    """Calculate CPC (Cost Per Click)"""
+    # calculate CPC
     return safe_divide(spend, clicks, 0.0)
 
 
 def calculate_cpm(spend: float, impressions: float) -> float:
-    """Calculate CPM (Cost Per 1000 Impressions)"""
+    # calculate CPM
     return safe_divide(spend * 1000, impressions, 0.0)
 
 
-def calculate_efficiency_score(acos: float, target_acos: float = 0.30) -> str:
-    """
-    Calculate efficiency score based on ACOS vs target
-    
-    Args:
-        acos: Actual ACOS
-        target_acos: Target ACOS (default 30%)
-    
-    Returns:
-        Efficiency rating string
-    """
-    if pd.isna(acos) or acos == 0:
-        return "N/A"
-    
-    ratio = acos / target_acos
-    
-    if ratio <= 0.7:
-        return "Excellent"
-    elif ratio <= 1.0:
-        return "Good"
-    elif ratio <= 1.3:
-        return "Fair"
-    else:
-        return "Poor"
 
 
 def calculate_performance_tier(roas: float) -> str:
@@ -581,7 +551,8 @@ def add_all_metrics(df: pd.DataFrame) -> pd.DataFrame:
             axis=1
         )
     
-    # Calculate CPM (Cost Per 1000 Impressions)
+    # Calculate CPM 
+
     if 'Spend' in result.columns and 'Impressions' in result.columns:
         result['CPM'] = result.apply(
             lambda row: calculate_cpm(row['Spend'], row['Impressions']), 
@@ -592,58 +563,22 @@ def add_all_metrics(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def calculate_organic_cvr(units_ordered: float, sessions: float) -> float:
-    """
-    Calculate organic conversion rate for business reports
-    
-    Args:
-        units_ordered: Number of units ordered
-        sessions: Number of sessions
-    
-    Returns:
-        Conversion rate as decimal
-    """
+
     return safe_divide(units_ordered, sessions, 0.0)
 
 
 def calculate_revenue_per_session(sales: float, sessions: float) -> float:
-    """
-    Calculate revenue per session
-    
-    Args:
-        sales: Total sales
-        sessions: Total sessions
-    
-    Returns:
-        Revenue per session
-    """
+   
     return safe_divide(sales, sessions, 0.0)
 
 
 def calculate_ntb_percentage(ntb_orders: float, total_orders: float) -> float:
-    """
-    Calculate New-to-Brand percentage
-    
-    Args:
-        ntb_orders: New-to-brand orders
-        total_orders: Total orders
-    
-    Returns:
-        NTB percentage as decimal
-    """
+
     return safe_divide(ntb_orders, total_orders, 0.0)
 
 
 def calculate_wasted_spend(df: pd.DataFrame, sales_threshold: float = 0) -> float:
-    """
-    Calculate wasted spend (spend with no sales)
-    
-    Args:
-        df: Dataframe with Spend and Sales columns
-        sales_threshold: Sales threshold (default 0)
-    
-    Returns:
-        Total wasted spend
-    """
+   
     if df is None or df.empty:
         return 0.0
     

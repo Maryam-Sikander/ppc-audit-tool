@@ -3,13 +3,13 @@ class Theme:
         'primary': '#0f172a',  
         'secondary': '#475569', 
         'success': '#059669',  
-        'warning': '#d97706',   # Amber 600
-        'danger': '#dc2626',    # Red 600
-        'info': '#2563eb',      # Blue 600
-        'background': '#f8fafc',# Slate 50
-        'card': '#ffffff',      # White
-        'text': '#1e293b',      # Slate 800
-        'text_secondary': '#64748b' # Slate 500
+        'warning': '#d97706',   
+        'danger': '#dc2626',    
+        'info': '#2563eb',    
+        'background': '#f8fafc',
+        'card': '#ffffff',     
+        'text': '#1e293b',      
+        'text_secondary': '#64748b' 
     }
     
     CHART_COLORS = [
@@ -24,7 +24,6 @@ class Theme:
 
 
 class ColumnMappings:
-    """Column name mappings for different report types"""
     
     # SP/SB Search Term Reports
     SEARCH_TERM_COLUMNS = {
@@ -127,7 +126,6 @@ class ColumnMappings:
 
 
 class Metrics:
-    """Standard metric calculations"""
     
     BASIC_METRICS = ['Clicks', 'Impressions', 'Spend', 'Sales', 'Orders']
     
@@ -147,30 +145,26 @@ class Metrics:
     SQP_METRICS = ['Brand Share', 'Opportunity Score', 'Price Gap']
 
 
-class Benchmarks:
-    """Industry benchmarks and thresholds"""
-    
-    # Campaign Performance
+class Benchmarks:    
     GOOD_ACOS = 0.30  # 30%
     GOOD_ROAS = 3.0
     GOOD_CTR = 0.005  # 0.5%
     GOOD_CVR = 0.10   # 10%
     
     # Sponsored Display
-    WASTED_SPEND_THRESHOLD = 0.20  # 20% is concerning
-    NTB_TARGET = 0.15  # 15% new-to-brand is good
+    WASTED_SPEND_THRESHOLD = 0.20  
+    NTB_TARGET = 0.15  # 15% 
     
-    # Organic Performance
-    GOOD_BUY_BOX = 0.80  # 80%
-    GOOD_ORGANIC_CVR = 0.12  # 12%
+    # Organic performance
+    GOOD_BUY_BOX = 0.80  
+    GOOD_ORGANIC_CVR = 0.12 
     
     # SQP Analysis
-    LOW_BRAND_SHARE = 0.10  # 10% - opportunity
-    HIGH_BRAND_SHARE = 0.30  # 30% - strong position
+    LOW_BRAND_SHARE = 0.10  
+    HIGH_BRAND_SHARE = 0.30  
 
 
 class ReportTypes:
-    """Report type identifiers"""
     SP_SEARCH = "sp_search"
     SP_PLACEMENT = "sp_placement"
     SB_SEARCH = "sb_search"
@@ -181,7 +175,6 @@ class ReportTypes:
 
 
 class Quarters:
-    """Quarter definitions"""
     Q1 = "Q1"
     Q2 = "Q2"
     Q3 = "Q3"

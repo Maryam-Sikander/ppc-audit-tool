@@ -37,7 +37,7 @@ def read_file(uploaded):
 
 # Header
 st.markdown('<div class="main-header">', unsafe_allow_html=True)
-st.markdown("<h1>Brand PPC Audit Dashboard</h1>", unsafe_allow_html=True)
+st.markdown("<h1>PPC Audit Dashboard</h1>", unsafe_allow_html=True)
 st.markdown(
     '<p style="opacity:0.6; font-size:1.05rem; margin-bottom:1.5rem;">'
     "Comprehensive analytics for Sponsored Products, Brands & Display campaigns.</p>",
@@ -106,7 +106,7 @@ if run_audit:
     waste = summary["Waste Spend"]
     profit = summary["Sales"] - summary["Spend"]
 
-    st.markdown("### Executive Summary")
+    st.markdown("### Performance Metrics")
 
     cols = st.columns(5)
     row1 = [

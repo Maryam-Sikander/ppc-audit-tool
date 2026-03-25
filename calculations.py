@@ -46,7 +46,7 @@ def parse_date_col(df):
 
 def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
     if df is None or df.empty:
-        return pd.DataFrame(columns=["Ad Type","Date","Campaign","Match Type","Placement","Clicks","Impressions","Spend","Sales","Orders"])
+        return pd.DataFrame(columns=["Ad Type","Date","Campaign","Match Type","Placement","Targeting","Search Term","Clicks","Impressions","Spend","Sales","Orders"])
 
     df = strip_cols(df)
 
@@ -76,6 +76,8 @@ def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
     match_col = first_present(df, ["Match Type", "match type", "MatchType"])
     plac_col = first_present(df, ["Placement", "placement"])
     camp_col = first_present(df, ["Campaign", "Campaign Name", "campaign"])
+    targeting_col = first_present(df, ["Targeting", "targeting", "Targeting Type"])
+    search_term_col = first_present(df, ["Customer Search Term", "Search Term", "customer search term", "search term", "Query"])
     date_series = parse_date_col(df)
 
     required_missing = [n for n, v in {
@@ -84,7 +86,7 @@ def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
     }.items() if v is None]
 
     if required_missing:
-        return pd.DataFrame(columns=["Ad Type","Date","Campaign","Match Type","Placement","Clicks","Impressions","Spend","Sales","Orders"])
+        return pd.DataFrame(columns=["Ad Type","Date","Campaign","Match Type","Placement","Targeting","Search Term","Clicks","Impressions","Spend","Sales","Orders"])
 
     out = pd.DataFrame()
     out["Ad Type"] = ad_type_hint
@@ -92,6 +94,13 @@ def normalize_report(df: pd.DataFrame, ad_type_hint: str) -> pd.DataFrame:
     out["Campaign"] = df[camp_col] if camp_col else ""
     out["Match Type"] = df[match_col] if match_col else ""
     out["Placement"] = df[plac_col] if plac_col else ""
+    out["Targeting"] = df[targeting_col] if targeting_col else ""
+    out["Search Term"] = df[search_term_col] if search_term_col else ""
+
+    # Replace "-", empty, and blank Match Type values with "Auto"
+    out["Match Type"] = out["Match Type"].astype(str).str.strip()
+    out["Match Type"] = out["Match Type"].replace({"-": "Auto", "": "Auto", "nan": "Auto"})
+    out.loc[out["Match Type"].isna(), "Match Type"] = "Auto"
 
     out["Clicks"] = clean_money_pct_numeric(df[clicks_col]).fillna(0)
     out["Impressions"] = clean_money_pct_numeric(df[impr_col]).fillna(0)

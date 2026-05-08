@@ -109,7 +109,7 @@ if run_audit:
 
 # ── Render dashboard if data exists in session_state ──
 if "audit_data" not in st.session_state:
-    st.info("Upload campaign reports in the sidebar and click **Run Audit** to begin.")
+    st.info("Upload reports in the sidebar and click **Run Audit** to begin.")
     st.stop()
 
 # Unpack persisted data
